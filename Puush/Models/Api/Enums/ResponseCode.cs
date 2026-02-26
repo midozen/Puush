@@ -1,0 +1,10 @@
+﻿namespace Puush.Models.API.Enums;
+
+public enum ResponseCode
+{
+    Success = 0,
+    AuthenticationFailure = -1,
+    Unknown = -2,
+    ChecksumError = -3,
+    InsufficientStorage = -4,
+}
