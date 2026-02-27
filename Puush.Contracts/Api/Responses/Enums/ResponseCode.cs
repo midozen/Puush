@@ -1,4 +1,4 @@
-﻿namespace Puush.Models.API.Enums;
+﻿namespace Puush.Contracts.Api.Responses.Enums;
 
 public enum ResponseCode
 {

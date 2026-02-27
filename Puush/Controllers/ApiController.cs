@@ -1,14 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Puush.Attributes;
-using Puush.Models;
-using Puush.Models.API;
-using Puush.Models.API.Enums;
+using Puush.Contracts.Api.Responses;
+using Puush.Contracts.Api.Responses.Enums;
+using Puush.Infrastructure.Security.Attributes;
+using Puush.Persistence.Models.Enums;
+using Puush.Shared.Web;
 
 namespace Puush.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class ApiController : PuushController
+public class ApiController : PuushControllerBase
 {
     // TODO: Handle api key authentication through an attribute or middleware
     [HttpPost("auth")]
@@ -25,7 +26,6 @@ public class ApiController : PuushController
         });
     }
     
-    // -2 or -1 warrants a break in the response parser
     [PuushAuthorize]
     [HttpPost("hist")]
     public IActionResult History()

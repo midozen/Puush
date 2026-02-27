@@ -1,4 +1,6 @@
-﻿namespace Puush.Models.API;
+﻿using Puush.Persistence.Models.Enums;
+
+namespace Puush.Contracts.Api.Responses;
 
 public class AuthResponse : PuushResponse
 {

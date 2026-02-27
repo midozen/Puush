@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Puush.Models.API;
-using Puush.Models.API.Enums;
+using Puush.Contracts.Api.Responses;
+using Puush.Contracts.Api.Responses.Enums;
 
-namespace Puush.Controllers;
+namespace Puush.Shared.Web;
 
-public abstract class PuushController : ControllerBase
+public abstract class PuushControllerBase : ControllerBase
 {
     protected static IActionResult Puush(PuushResponse response)
         => new ContentResult

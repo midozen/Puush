@@ -1,6 +1,6 @@
-﻿using Puush.Models.API.Enums;
+﻿using Puush.Contracts.Api.Responses.Enums;
 
-namespace Puush.Models.API;
+namespace Puush.Contracts.Api.Responses;
 
 public class UploadResponse : PuushResponse
 {

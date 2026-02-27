@@ -1,4 +1,4 @@
-﻿namespace Puush.Models.API;
+﻿namespace Puush.Contracts.Api.Responses;
 
 public class RecentUpload : PuushResponse
 {

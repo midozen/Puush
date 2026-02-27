@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Puush.Models;
+namespace Puush.Persistence.Models.Enums;
 
 public enum AccountType
 {
