@@ -3,7 +3,7 @@
 public class RecentUpload : IPuushResponse
 {
     public int Id { get; set; }
-    public DateTime UploadDate { get; set; }
+    public DateTimeOffset UploadDate { get; set; }
     public string Url { get; set; } = string.Empty;
     public string FileName { get; set; } = string.Empty;
     public int ViewCount { get; set; }

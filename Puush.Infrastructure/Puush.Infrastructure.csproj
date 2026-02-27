@@ -12,6 +12,7 @@
     </ItemGroup>
     
     <ItemGroup>
+      <ProjectReference Include="..\Puush.Contracts\Puush.Contracts.csproj" />
       <ProjectReference Include="..\Puush.Persistence\Puush.Persistence.csproj" />
     </ItemGroup>
 

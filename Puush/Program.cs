@@ -14,6 +14,7 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
     options.UseMySQL(connectionString));
 
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ISessionService, SessionService>();
 
 builder.Services.AddScoped<IPasswordHasher<Account>, PasswordHasher<Account>>();

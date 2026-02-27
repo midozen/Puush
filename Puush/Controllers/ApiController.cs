@@ -2,37 +2,32 @@
 using Puush.Contracts.Api.Responses;
 using Puush.Contracts.Api.Enums;
 using Puush.Infrastructure.Security.Attributes;
-using Puush.Persistence.Models.Enums;
+using Puush.Infrastructure.Services;
 using Puush.Shared.Web;
 
 namespace Puush.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class ApiController : PuushControllerBase
+public class ApiController(IAuthService authService) : PuushControllerBase
 {
-    // TODO: Handle api key authentication through an attribute or middleware
     [HttpPost("auth")]
-    public IActionResult Auth([FromForm(Name = "p")] string? password, [FromForm(Name = "k")] string? apiKey)
+    public async Task<IActionResult> Auth(
+        [FromForm(Name = "e")] string username,
+        [FromForm(Name = "p")] string? password,
+        [FromForm(Name = "k")] string? apiKey)
     {
-        // return Ok("0,TEST,09-19-2025,5000000");
-        
-        return Puush(new AuthResponse
-        {
-            AccountType = AccountType.Haxor,
-            ApiKey = "TEST",
-            ExpirationDate = new DateTime(2025, 9, 19),
-            Usage = 5000000
-        });
+        if (string.IsNullOrWhiteSpace(apiKey) && string.IsNullOrEmpty(password))
+            return PuushCode(ResponseCode.AuthenticationFailure);
+
+        var response = await authService.AuthenticateAsync(username, password, apiKey);
+        return response is null ? PuushCode(ResponseCode.AuthenticationFailure) : Puush(response);
     }
     
     [PuushAuthorize]
     [HttpPost("hist")]
     public IActionResult History()
     {
-        // return Ok("0\n" +
-        //           "1,09-19-2025,http://localhost:5168/ABCD,ABCD.png,67");
-
         return PuushArray(ResponseCode.Success, [
             new RecentUpload
             {
@@ -73,8 +68,6 @@ public class ApiController : PuushControllerBase
     [HttpPost("up")]
     public IActionResult UploadImage([FromForm(Name = "f")] IFormFile file)
     {
-        // return Ok("0,http://localhost:5168/ABCD,ABCD.png,5000000");
-        
         return Puush(new UploadResponse
         {
             Code = ResponseCode.Success,
