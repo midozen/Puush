@@ -15,5 +15,9 @@
       <ProjectReference Include="..\Puush.Contracts\Puush.Contracts.csproj" />
       <ProjectReference Include="..\Puush.Persistence\Puush.Persistence.csproj" />
     </ItemGroup>
+    
+    <ItemGroup>
+      <PackageReference Include="AWSSDK.S3" Version="4.0.18.7" />
+    </ItemGroup>
 
 </Project>

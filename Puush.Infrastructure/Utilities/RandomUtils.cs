@@ -4,7 +4,8 @@ namespace Puush.Infrastructure.Utilities;
 
 public static class RandomUtils
 {
-    private const string Alphabet = "abcdefghijkmnpqrstuvwxyz23456789";
+    private const string Alphabet =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
     public static string GenerateSecureRandomString(int length = 16)
     {
@@ -15,7 +16,7 @@ public static class RandomUtils
 
         for (var i = 0; i < length; i++)
         {
-            chars[i] = Alphabet[bytes[i] & 31];
+            chars[i] = Alphabet[bytes[i] & (Alphabet.Length - 1)];
         }
 
         return new string(chars);

@@ -32,7 +32,7 @@ public class ApiController(IAuthService authService) : PuushControllerBase
             new RecentUpload
             {
                 Id = 1,
-                UploadDate = new DateTime(2025, 9, 19),
+                CreatedAt = new DateTime(2025, 9, 19),
                 Url = "http://localhost:5168/ABCD",
                 FileName = "ABCD.png",
                 ViewCount = 67
@@ -40,7 +40,7 @@ public class ApiController(IAuthService authService) : PuushControllerBase
             new RecentUpload
             {
                 Id = 2,
-                UploadDate = new DateTime(2025, 9, 19),
+                CreatedAt = new DateTime(2025, 9, 19),
                 Url = "http://localhost:5168/ABCDE",
                 FileName = "ABCDE.jpg",
                 ViewCount = 54
@@ -48,7 +48,7 @@ public class ApiController(IAuthService authService) : PuushControllerBase
             new RecentUpload
             {
                 Id = 3,
-                UploadDate = new DateTime(2025, 9, 19),
+                CreatedAt = new DateTime(2025, 9, 19),
                 Url = "http://localhost:5168/ABCDE",
                 FileName = "TEST.zip",
                 ViewCount = 32

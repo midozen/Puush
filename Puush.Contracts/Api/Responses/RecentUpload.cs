@@ -2,14 +2,14 @@
 
 public class RecentUpload : IPuushResponse
 {
-    public int Id { get; set; }
-    public DateTimeOffset UploadDate { get; set; }
-    public string Url { get; set; } = string.Empty;
-    public string FileName { get; set; } = string.Empty;
-    public int ViewCount { get; set; }
-
+    public int Id { get; init; }
+    public DateTimeOffset CreatedAt { get; init; }
+    public string Url { get; init; } = string.Empty;
+    public string FileName { get; init; } = string.Empty;
+    public int ViewCount { get; init; }
+    
     public string Serialize()
     {
-        return $"{Id},{UploadDate:MM-dd-yyyy},{Url},{FileName},{ViewCount}";
+        return $"{Id},{CreatedAt:MM-dd-yyyy},{Url},{FileName},{ViewCount}";
     }
 }
