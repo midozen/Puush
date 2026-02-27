@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Puush.Infrastructure.Security.Attributes;
+using Puush.Infrastructure.Services;
 
 namespace Puush.Infrastructure.Security.Middleware;
 
 public sealed class PuushAuthMiddleware(RequestDelegate next)
 {
-    public async Task InvokeAsync(HttpContext context)
+    public async Task InvokeAsync(HttpContext context, ISessionService sessionService)
     {
         var endpoint = context.GetEndpoint();
         var requiresAuth = endpoint?.Metadata.GetMetadata<PuushAuthorizeAttribute>() != null;
@@ -38,6 +39,13 @@ public sealed class PuushAuthMiddleware(RequestDelegate next)
         var apiKey = form["k"].FirstOrDefault();
 
         if (string.IsNullOrEmpty(apiKey))
+        {
+            await RejectAsync(context, 401, "Unauthorized");
+            return;
+        }
+        
+        var session = await sessionService.ValidateSessionAsync(apiKey);
+        if (session == null)
         {
             await RejectAsync(context, 401, "Unauthorized");
             return;

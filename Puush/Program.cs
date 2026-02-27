@@ -1,6 +1,9 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Puush.Infrastructure.Security.Middleware;
+using Puush.Infrastructure.Services;
 using Puush.Persistence;
+using Puush.Persistence.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +12,12 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddDbContext<DatabaseContext>(options =>
     options.UseMySQL(connectionString));
+
+builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<ISessionService, SessionService>();
+
+builder.Services.AddScoped<IPasswordHasher<Account>, PasswordHasher<Account>>();
+builder.Services.AddScoped<IPasswordService, PasswordService>();
 
 builder.Services.AddControllers();
 

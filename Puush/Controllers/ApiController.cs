@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Puush.Contracts.Api.Responses;
-using Puush.Contracts.Api.Responses.Enums;
+using Puush.Contracts.Api.Enums;
 using Puush.Infrastructure.Security.Attributes;
 using Puush.Persistence.Models.Enums;
 using Puush.Shared.Web;

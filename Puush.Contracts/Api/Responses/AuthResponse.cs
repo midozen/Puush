@@ -2,14 +2,14 @@
 
 namespace Puush.Contracts.Api.Responses;
 
-public class AuthResponse : PuushResponse
+public class AuthResponse : IPuushResponse
 {
     public AccountType AccountType { get; init; }
     public required string ApiKey { get; init; }
     public DateTime ExpirationDate { get; init; }
     public long Usage { get; init; }
     
-    public override string Serialize()
+    public string Serialize()
     {
         return $"{(int)AccountType},{ApiKey},{ExpirationDate:MM-dd-yyyy},{Usage}";
     }

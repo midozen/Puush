@@ -1,6 +1,6 @@
 ﻿namespace Puush.Contracts.Api.Responses;
 
-public class RecentUpload : PuushResponse
+public class RecentUpload : IPuushResponse
 {
     public int Id { get; set; }
     public DateTime UploadDate { get; set; }
@@ -8,7 +8,7 @@ public class RecentUpload : PuushResponse
     public string FileName { get; set; } = string.Empty;
     public int ViewCount { get; set; }
 
-    public override string Serialize()
+    public string Serialize()
     {
         return $"{Id},{UploadDate:MM-dd-yyyy},{Url},{FileName},{ViewCount}";
     }
