@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Puush.Attributes;
 using Puush.Models;
 using Puush.Models.API;
 using Puush.Models.API.Enums;
@@ -25,8 +26,9 @@ public class ApiController : PuushController
     }
     
     // -2 or -1 warrants a break in the response parser
+    [PuushAuthorize]
     [HttpPost("hist")]
-    public IActionResult History([FromForm(Name = "k")] string apiKey)
+    public IActionResult History()
     {
         // return Ok("0\n" +
         //           "1,09-19-2025,http://localhost:5168/ABCD,ABCD.png,67");
@@ -59,15 +61,17 @@ public class ApiController : PuushController
         ]);
     }
     
+    [PuushAuthorize]
     [HttpPost("thumb")]
-    public IActionResult Thumbnail([FromForm(Name = "k")] string apiKey, [FromForm(Name = "i")] int id)
+    public IActionResult Thumbnail([FromForm(Name = "i")] int id)
     {
         // EXPECT: 200 with image data, 404 if not found
         return NotFound();
     }
     
+    [PuushAuthorize]
     [HttpPost("up")]
-    public IActionResult UploadImage([FromForm(Name = "k")] string apiKey, [FromForm(Name = "f")] IFormFile file)
+    public IActionResult UploadImage([FromForm(Name = "f")] IFormFile file)
     {
         // return Ok("0,http://localhost:5168/ABCD,ABCD.png,5000000");
         
