@@ -27,7 +27,7 @@ public class RootController(DatabaseContext dbContext, ICdnService cdnService) :
             .ExecuteUpdateAsync(s => 
                 s.SetProperty(u => u.ViewCount, u => u.ViewCount + 1));
 
-        var obj = await cdnService.GetFileAsync(upload.FileName);
+        var obj = await cdnService.GetFileOrFallbackAsync(upload.FileName);
         
         var contentType =
             (obj.Headers.ContentType == "application/octet-stream"
@@ -35,7 +35,11 @@ public class RootController(DatabaseContext dbContext, ICdnService cdnService) :
                 : obj.Headers.ContentType)
             ?? "application/octet-stream";
         
-        Response.Headers[HeaderNames.ContentDisposition] = "inline";
+        // Maybe FileName isn't useless.
+        Response.Headers[HeaderNames.ContentDisposition] =
+            string.IsNullOrWhiteSpace(fileName)
+                ? "inline"
+                : $"inline; filename=\"{fileName}\"";
         
         return File(
             obj.ResponseStream, 
@@ -43,20 +47,36 @@ public class RootController(DatabaseContext dbContext, ICdnService cdnService) :
         );
     }
     
+    [HttpGet("thumb/{shortCode}")]
+    public async Task<IActionResult> GetThumb(string shortCode)
+    {
+        var key = $"{shortCode}_thumb.jpg";
+
+        var file = await cdnService.GetFileOrFallbackAsync(key);
+        
+        return File(
+            file.ResponseStream, 
+            file.Headers.ContentType
+        );
+    }
+    
+    // TODO: use the util in infra instead of local method
     private static string? GuessContentType(string fileName)
     {
         var ext = Path.GetExtension(fileName).ToLowerInvariant();
+        
         return ext switch
         {
-            ".png"  => "image/png",
-            ".jpg"  => "image/jpeg",
-            ".jpeg" => "image/jpeg",
-            ".gif"  => "image/gif",
+            ".png" => "image/png",
+            ".jpg" or "jpeg" => "image/jpeg",
+            ".gif" => "image/gif",
             ".webp" => "image/webp",
-            ".bmp"  => "image/bmp",
-            ".svg"  => "image/svg+xml",
-            ".ico"  => "image/x-icon",
-            _ => null
+            ".bmp" => "image/bmp",
+            ".ico" => "image/x-icon",
+            ".tif" or "tiff" => "image/tiff",
+            ".heic" => "image/heic",
+            ".heif" => "image/heif",
+            _ => "application/octet-stream"
         };
     }
 }

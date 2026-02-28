@@ -10,6 +10,8 @@ public interface ICdnService
     Task<string> UploadFileAsync(string key, Stream fileStream, string contentType);
     Task<GetObjectResponse> GetFileAsync(string key);
     Task DeleteFileAsync(string key);
+    
+    Task<GetObjectResponse> GetFileOrFallbackAsync(string key);
 }
 
 public sealed class CdnService : ICdnService
@@ -77,5 +79,19 @@ public sealed class CdnService : ICdnService
             throw new ArgumentException("Key cannot be empty.", nameof(key));
         
         await _s3Client.DeleteObjectAsync(_bucketName, key);
+    }
+
+    public async Task<GetObjectResponse> GetFileOrFallbackAsync(string key)
+    {
+        try
+        {
+            var response = await GetFileAsync(key);
+            
+            return response;
+        }
+        catch (AmazonS3Exception ex) when ((int)ex.StatusCode == 404)
+        {
+            return await GetFileAsync("offline_thumb.jpg");
+        }
     }
 }

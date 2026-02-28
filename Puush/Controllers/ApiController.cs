@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Amazon.S3;
 using Puush.Contracts.Api.Enums;
 using Puush.Contracts.Api.Responses;
+using Puush.Infrastructure.Extensions;
 using Puush.Infrastructure.Security.Attributes;
 using Puush.Infrastructure.Services;
-using Puush.Infrastructure.Utilities;
 using Puush.Persistence;
 using Puush.Persistence.Models;
 using Puush.Shared.Web;
@@ -55,19 +56,21 @@ public class ApiController(
         return PuushArray(ResponseCode.Success, uploads);
     }
 
-    // TODO: implement proper thumbnail generation and caching instead of just returning the original file
     [PuushAuthorize]
     [HttpPost("thumb")]
     public async Task<IActionResult> Thumbnail([FromForm(Name = "i")] long id)
     {
-        var upload = await dbContext.Uploads
+        var shortCode = await dbContext.Uploads
             .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Id == id && u.AccountId == AccountId);
-        
-        if (upload is null)
+            .Where(u => u.Id == id && u.AccountId == AccountId)
+            .Select(u => u.ShortCode)
+            .FirstOrDefaultAsync();
+        if (shortCode is null)
             return PuushCode(ResponseCode.Unknown);
         
-        var file = await cdnService.GetFileAsync(upload.FileName);
+        var key = $"{shortCode}_thumb.jpg";
+
+        var file = await cdnService.GetFileOrFallbackAsync(key);
         
         return File(
             file.ResponseStream, 
@@ -96,7 +99,7 @@ public class ApiController(
         if (AccountId is null)
             return Unauthorized();
         
-        if (file.Length <= 0)
+        if (file.Length <= 0 || !file.IsSupportedImage())
             return PuushCode(ResponseCode.Unknown);
 
         var upload = await uploadService.AddUploadAsync(file, AccountId.Value);

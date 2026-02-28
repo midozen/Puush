@@ -21,14 +21,14 @@ public sealed class PuushAuthMiddleware(RequestDelegate next)
         // 1. Check if method is POST
         if (!HttpMethods.IsPost(context.Request.Method))
         {
-            await RejectAsync(context, 405, "Method Not Allowed");
+            await RejectAsync(context, 405, "-2");
             return;
         }
 
         // 2. Check if request has form data
         if (!context.Request.HasFormContentType)
         {
-            await RejectAsync(context, 405, "Bad Request");
+            await RejectAsync(context, 405, "-2");
             return;
         }
         
@@ -41,7 +41,7 @@ public sealed class PuushAuthMiddleware(RequestDelegate next)
 
         if (string.IsNullOrEmpty(apiKey))
         {
-            await RejectAsync(context, 401, "Unauthorized");
+            await RejectAsync(context, 401, "-1");
             return;
         }
         
@@ -49,7 +49,7 @@ public sealed class PuushAuthMiddleware(RequestDelegate next)
         var session = await sessionService.ValidateSessionAsync(apiKey);
         if (session == null)
         {
-            await RejectAsync(context, 401, "Unauthorized");
+            await RejectAsync(context, 401, "-1");
             return;
         }
         
