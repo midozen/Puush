@@ -17,25 +17,30 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ISessionService, SessionService>();
 builder.Services.AddScoped<IUsageService, UsageService>();
-
 builder.Services.AddScoped<ICdnService, CdnService>();
 builder.Services.AddScoped<IUploadService, UploadService>();
-
 
 builder.Services.AddScoped<IPasswordHasher<Account>, PasswordHasher<Account>>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 
-builder.Services.AddControllers();
+builder.Services.AddRouting(o => o.LowercaseUrls = true);
+
+builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-
 app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
 
 app.UseMiddleware<PuushAuthMiddleware>();
 
 app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}"
+);
 
 app.MapControllers();
 

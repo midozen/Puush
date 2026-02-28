@@ -20,4 +20,8 @@
       <ProjectReference Include="..\Puush.Persistence\Puush.Persistence.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="wwwroot\css\" />
+    </ItemGroup>
+
 </Project>
