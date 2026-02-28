@@ -19,6 +19,6 @@ public class Session
     public DateTimeOffset ExpiresAt { get; set; }
 
     [ForeignKey(nameof(Account))]
-    public long AccountId { get; init; }
+    public required long AccountId { get; init; }
     public Account Account { get; init; } = null!;
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 using Puush.Infrastructure.Security.Attributes;
 using Puush.Infrastructure.Services;
 
@@ -44,12 +45,22 @@ public sealed class PuushAuthMiddleware(RequestDelegate next)
             return;
         }
         
+        // 4. Validate API Key
         var session = await sessionService.ValidateSessionAsync(apiKey);
         if (session == null)
         {
             await RejectAsync(context, 401, "Unauthorized");
             return;
         }
+        
+        // 5. Create claims and set user
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, session.AccountId.ToString())
+        };
+
+        var identity = new ClaimsIdentity(claims, "PuushAuth");
+        context.User = new ClaimsPrincipal(identity);
         
         await next(context);
     }

@@ -5,16 +5,16 @@ namespace Puush.Contracts.Api.Responses;
 
 public class AuthResponse : IPuushResponse
 {
-    private AuthResponse(Account account, string apiKey, DateTimeOffset expires, long usage)
+    private AuthResponse(Account account, string apiKey, DateTimeOffset expires)
     {
         AccountType = account.AccountType;
         ApiKey = apiKey;
-        ExpirationDate = expires;
-        Usage = usage; // TODO: Calculate usage
+        ExpirationDate = expires; 
+        Usage = account.UsageBytes;
     }
     
-    public static AuthResponse FromAccount(Account account, string apiKey, DateTimeOffset expires, long usage = 0)
-        => new(account, apiKey, expires, usage);
+    public static AuthResponse FromAccount(Account account, string apiKey, DateTimeOffset expires)
+        => new(account, apiKey, expires);
     
     private AccountType AccountType { get; }
     private string ApiKey { get; }

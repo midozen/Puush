@@ -16,8 +16,11 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ISessionService, SessionService>();
+builder.Services.AddScoped<IUsageService, UsageService>();
 
-builder.Services.AddScoped<ICdnService, ICdnService>();
+builder.Services.AddScoped<ICdnService, CdnService>();
+builder.Services.AddScoped<IUploadService, UploadService>();
+
 
 builder.Services.AddScoped<IPasswordHasher<Account>, PasswordHasher<Account>>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();

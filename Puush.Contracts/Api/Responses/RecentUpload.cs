@@ -2,7 +2,7 @@
 
 public class RecentUpload : IPuushResponse
 {
-    public int Id { get; init; }
+    public long Id { get; init; }
     public DateTimeOffset CreatedAt { get; init; }
     public string Url { get; init; } = string.Empty;
     public string FileName { get; init; } = string.Empty;

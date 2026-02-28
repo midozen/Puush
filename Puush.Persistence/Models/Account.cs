@@ -15,8 +15,11 @@ public class Account
     [MaxLength(20)] public required string Username { get; set; }
     [MaxLength(256)] public string PasswordHash { get; set; } = null!;
     
+    public long UsageBytes { get; set; }
+    
     public AccountType AccountType { get; set; } = AccountType.Free;
     public DateTimeOffset CreatedAt { get; init; } = DateTimeOffset.UtcNow;
     
     public ICollection<Session> Sessions { get; set; } = new List<Session>();
+    public ICollection<Upload> Uploads { get; set; } = new List<Upload>();
 }

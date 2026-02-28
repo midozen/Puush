@@ -6,6 +6,15 @@ namespace Puush.Shared.Web;
 
 public abstract class PuushControllerBase : ControllerBase
 {
+    protected long? AccountId
+    {
+        get
+        {
+            var claim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            return claim != null ? long.Parse(claim.Value) : null;
+        }
+    }
+    
     /// <summary>
     /// Creates a ContentResult with the specified ResponseCode as the content, formatted as plain text, and a status code of 200.
     /// </summary>

@@ -7,4 +7,5 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : DbCont
 {
     public DbSet<Account> Accounts { get; set; }
     public DbSet<Session> Sessions { get; set; }
+    public DbSet<Upload> Uploads { get; set; }
 }

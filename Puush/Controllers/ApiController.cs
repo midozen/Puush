@@ -1,15 +1,25 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Puush.Contracts.Api.Responses;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Puush.Contracts.Api.Enums;
+using Puush.Contracts.Api.Responses;
 using Puush.Infrastructure.Security.Attributes;
 using Puush.Infrastructure.Services;
+using Puush.Infrastructure.Utilities;
+using Puush.Persistence;
+using Puush.Persistence.Models;
 using Puush.Shared.Web;
 
 namespace Puush.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class ApiController(IAuthService authService) : PuushControllerBase
+public class ApiController(
+    DatabaseContext dbContext,
+    IConfiguration configuration,
+    IAuthService authService,
+    ICdnService cdnService,
+    IUploadService uploadService,
+    IUsageService usageService) : PuushControllerBase
 {
     [HttpPost("auth")]
     public async Task<IActionResult> Auth(
@@ -23,57 +33,80 @@ public class ApiController(IAuthService authService) : PuushControllerBase
         var response = await authService.AuthenticateAsync(username, password, apiKey);
         return response is null ? PuushCode(ResponseCode.AuthenticationFailure) : Puush(response);
     }
-    
+
     [PuushAuthorize]
     [HttpPost("hist")]
-    public IActionResult History()
+    public async Task<IActionResult> History()
     {
-        return PuushArray(ResponseCode.Success, [
-            new RecentUpload
+        var uploads = await dbContext.Uploads
+            .Where(u => u.AccountId == AccountId)
+            .OrderByDescending(u => u.CreatedAt)
+            .Take(5)
+            .Select(u => new RecentUpload
             {
-                Id = 1,
-                CreatedAt = new DateTime(2025, 9, 19),
-                Url = "http://localhost:5168/ABCD",
-                FileName = "ABCD.png",
-                ViewCount = 67
-            },
-            new RecentUpload
-            {
-                Id = 2,
-                CreatedAt = new DateTime(2025, 9, 19),
-                Url = "http://localhost:5168/ABCDE",
-                FileName = "ABCDE.jpg",
-                ViewCount = 54
-            },
-            new RecentUpload
-            {
-                Id = 3,
-                CreatedAt = new DateTime(2025, 9, 19),
-                Url = "http://localhost:5168/ABCDE",
-                FileName = "TEST.zip",
-                ViewCount = 32
-            },
-        ]);
+                Id = u.Id,
+                CreatedAt = u.CreatedAt,
+                Url = $"{configuration["Puush:BaseUrl"]}/{u.ShortCode}",
+                FileName = u.FileName,
+                ViewCount = u.ViewCount
+            })
+            .ToListAsync();
+        
+        return PuushArray(ResponseCode.Success, uploads);
     }
-    
+
+    // TODO: implement proper thumbnail generation and caching instead of just returning the original file
     [PuushAuthorize]
     [HttpPost("thumb")]
-    public IActionResult Thumbnail([FromForm(Name = "i")] int id)
+    public async Task<IActionResult> Thumbnail([FromForm(Name = "i")] long id)
     {
-        // EXPECT: 200 with image data, 404 if not found
-        return NotFound();
+        var upload = await dbContext.Uploads
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Id == id && u.AccountId == AccountId);
+        
+        if (upload is null)
+            return PuushCode(ResponseCode.Unknown);
+        
+        var file = await cdnService.GetFileAsync(upload.FileName);
+        
+        return File(
+            file.ResponseStream, 
+            file.Headers.ContentType
+        );
+    }
+
+    [PuushAuthorize]
+    [HttpPost("del")]
+    public async Task<IActionResult> DeleteUpload([FromForm(Name = "i")] long id)
+    {
+        if (AccountId is null)
+            return Unauthorized();
+        
+        var result = await uploadService.DeleteUploadAsync(id, AccountId.Value);
+        
+        return PuushCode(result);
     }
     
+    // TODO: Validate checksum of uploaded file and return error if it doesn't match
+    // TODO: If this is a free account, check if user has exceeded their upload limit and return error if they have
     [PuushAuthorize]
     [HttpPost("up")]
-    public IActionResult UploadImage([FromForm(Name = "f")] IFormFile file)
+    public async Task<IActionResult> UploadImage([FromForm(Name = "f")] IFormFile file)
     {
+        if (AccountId is null)
+            return Unauthorized();
+        
+        if (file.Length <= 0)
+            return PuushCode(ResponseCode.Unknown);
+
+        var upload = await uploadService.AddUploadAsync(file, AccountId.Value);
+
         return Puush(new UploadResponse
         {
             Code = ResponseCode.Success,
-            FileName = "http://localhost:5168/ABCD",
-            Url = "ABCD.png",
-            Usage = 5000000
+            Url = $"{configuration["Puush:BaseUrl"]}/{upload.ShortCode}",
+            FileName = upload.FileName,
+            Usage = await usageService.GetUsageAsync(AccountId.Value)
         });
     }
 }

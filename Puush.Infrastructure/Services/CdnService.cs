@@ -1,5 +1,6 @@
-﻿using Amazon.Runtime;
+using Amazon.Runtime;
 using Amazon.S3;
+using Amazon.S3.Model;
 using Microsoft.Extensions.Configuration;
 
 namespace Puush.Infrastructure.Services;
@@ -7,18 +8,19 @@ namespace Puush.Infrastructure.Services;
 public interface ICdnService
 {
     Task<string> UploadFileAsync(string key, Stream fileStream, string contentType);
-    string GetFileUrl(string key);
+    Task<GetObjectResponse> GetFileAsync(string key);
+    Task DeleteFileAsync(string key);
 }
 
 public sealed class CdnService : ICdnService
 {
-    private static string _bucketName = null!;
-    private readonly IAmazonS3 _s3Client;
+    private readonly string _bucketName;
+    private readonly AmazonS3Client _s3Client;
 
     public CdnService(IConfiguration configuration)
     {
         _bucketName = configuration["R2:BucketName"] ?? throw new InvalidOperationException("Missing R2:BucketName");
-        
+
         var accountId = configuration["R2:AccountId"] ?? throw new InvalidOperationException("Missing R2:AccountId");
         var accessKey = configuration["R2:AccessKey"] ?? throw new InvalidOperationException("Missing R2:AccessKey");
         var secretKey = configuration["R2:SecretKey"] ?? throw new InvalidOperationException("Missing R2:SecretKey");
@@ -35,11 +37,45 @@ public sealed class CdnService : ICdnService
 
     public async Task<string> UploadFileAsync(string key, Stream fileStream, string contentType)
     {
-        throw new NotImplementedException();
+        if (string.IsNullOrWhiteSpace(key))
+            throw new ArgumentException("Key cannot be empty.", nameof(key));
+
+        ArgumentNullException.ThrowIfNull(fileStream);
+
+        if (string.IsNullOrWhiteSpace(contentType))
+            throw new ArgumentException("Content type cannot be empty.", nameof(contentType));
+
+        var request = new PutObjectRequest
+        {
+            BucketName = _bucketName,
+            Key = key,
+            InputStream = fileStream,
+            ContentType = contentType,
+            AutoCloseStream = false,
+            DisablePayloadSigning = true,
+            DisableDefaultChecksumValidation = true
+        };
+
+        await _s3Client.PutObjectAsync(request);
+        return key;
     }
 
-    public string GetFileUrl(string key)
+    // TODO: Consider returning something that abstracts the S3 response instead of exposing the entire GetObjectResponse.
+    public async Task<GetObjectResponse> GetFileAsync(string key)
     {
-        throw new NotImplementedException();
+        if (string.IsNullOrWhiteSpace(key))
+            throw new ArgumentException("Key cannot be empty.", nameof(key));
+        
+        var response = await _s3Client.GetObjectAsync(_bucketName, key);
+
+        return response;
+    }
+    
+    public async Task DeleteFileAsync(string key)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+            throw new ArgumentException("Key cannot be empty.", nameof(key));
+        
+        await _s3Client.DeleteObjectAsync(_bucketName, key);
     }
 }
